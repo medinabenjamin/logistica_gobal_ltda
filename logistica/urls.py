@@ -21,6 +21,8 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from transporte.views import home
+
 schema_view = get_schema_view(
     openapi.Info(
         title="Logistica API",
@@ -33,6 +35,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("", home, name="home"),
     path("api/", include("transporte.urls")),
     path(
         "swagger/",
