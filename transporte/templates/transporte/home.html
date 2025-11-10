@@ -1,0 +1,38 @@
+{% extends "transporte/base.html" %}
+
+{% block title %}Inicio · Transporte{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title h4 mb-3">Bienvenido a Logística Global Ltda.</h2>
+                <p class="card-text">
+                    Esta plataforma permite gestionar vehículos, aeronaves, conductores, pilotos,
+                    clientes, cargas, rutas y despachos de manera centralizada. Utiliza los accesos
+                    en la navegación superior para explorar los recursos disponibles.
+                </p>
+                <hr>
+                <h3 class="h5">Recursos disponibles</h3>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <strong>API REST:</strong> Visita la <a href="/swagger/">documentación interactiva</a>
+                        o el <a href="/redoc/">manual Redoc</a> para conocer los endpoints.
+                    </li>
+                    <li class="mb-2">
+                        <strong>Autenticación:</strong> Obtén un token JWT desde <code>/api/token/</code>
+                        y renuévalo en <code>/api/token/refresh/</code> para realizar operaciones seguras.
+                    </li>
+                    <li class="mb-2">
+                        <strong>Salud del sistema:</strong> Comprueba la disponibilidad en <code>/api/ping/</code>.
+                    </li>
+                </ul>
+                <p class="text-muted mb-0">
+                    Para comenzar, inicia sesión en el panel de administración o consume la API según tus necesidades.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

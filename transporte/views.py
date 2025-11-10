@@ -1,3 +1,4 @@
+from django.shortcuts import render
 from rest_framework import filters, permissions, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.permissions import BasePermission
@@ -30,6 +31,12 @@ def ping(_request):
     """Simple endpoint for health checks."""
 
     return Response({"message": "pong"})
+
+
+def home(request):
+    """Render the public homepage for the transporte module."""
+
+    return render(request, "transporte/home.html")
 
 
 class IsAuthenticatedForWrite(BasePermission):
