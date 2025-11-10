@@ -1,6 +1,10 @@
 from django.contrib import messages
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from rest_framework import filters, permissions, viewsets
 from rest_framework.decorators import api_view
@@ -46,6 +50,7 @@ def ping(_request):
     return Response({"message": "pong"})
 
 
+@login_required(login_url="login")
 def home(request):
     """Render the public homepage for the transporte module."""
 
@@ -245,6 +250,44 @@ def home(request):
             "modules": list(module_contexts.values()),
         },
     )
+
+
+def login_view(request):
+    """Handle user authentication for the management panel."""
+
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    form = AuthenticationForm(request=request, data=request.POST or None)
+    for field in form.fields.values():
+        existing_classes = field.widget.attrs.get("class", "")
+        field.widget.attrs["class"] = " ".join(
+            value for value in [existing_classes, "form-control"] if value
+        )
+
+    if request.method == "POST":
+        if form.is_valid():
+            auth_login(request, form.get_user())
+            return redirect("home")
+
+    return render(
+        request,
+        "transporte/login.html",
+        {
+            "form": form,
+        },
+    )
+
+
+@login_required(login_url="login")
+def logout_view(request):
+    """Log out the current user and redirect to the login page."""
+
+    if request.method == "POST":
+        auth_logout(request)
+        return redirect("login")
+
+    return redirect("home")
 
 
 class IsAuthenticatedForWrite(BasePermission):
