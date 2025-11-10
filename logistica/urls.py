@@ -21,7 +21,7 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from transporte.views import home
+from transporte.views import home, login_view, logout_view
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -36,6 +36,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", home, name="home"),
+    path("login/", login_view, name="login"),
+    path("logout/", logout_view, name="logout"),
     path("api/", include("transporte.urls")),
     path(
         "swagger/",
