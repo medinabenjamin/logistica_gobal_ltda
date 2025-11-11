@@ -6,10 +6,12 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.db.models import Count, Sum
 from rest_framework import filters, permissions, viewsets
 from rest_framework.decorators import api_view
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .forms import (
     AeronaveForm,
@@ -351,7 +353,7 @@ class AeronaveViewSet(viewsets.ModelViewSet):
 class ConductorViewSet(viewsets.ModelViewSet):
     queryset = Conductor.objects.all()
     serializer_class = ConductorSerializer
-    permission_classes = [IsAuthenticatedForWrite]
+    permission_classes = [permissions.IsAdminUser]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["run", "nombre", "licencia"]
     ordering_fields = ["run", "nombre", "licencia", "activo"]
@@ -360,7 +362,7 @@ class ConductorViewSet(viewsets.ModelViewSet):
 class PilotoViewSet(viewsets.ModelViewSet):
     queryset = Piloto.objects.all()
     serializer_class = PilotoSerializer
-    permission_classes = [IsAuthenticatedForWrite]
+    permission_classes = [permissions.IsAdminUser]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["run", "nombre", "licencia"]
     ordering_fields = ["run", "nombre", "licencia", "horas_vuelo", "activo"]
@@ -407,3 +409,29 @@ class DespachoViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["codigo", "estado", "ruta__codigo"]
     ordering_fields = ["codigo", "fecha", "estado", "ruta__codigo"]
+
+
+class ReporteCargasView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = (
+            Carga.objects
+            .values("cliente__nombre")
+            .annotate(total_peso=Sum("peso_kg"))
+            .order_by("-total_peso")
+        )
+        return Response(data)
+
+
+class ReporteRutasView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = (
+            Despacho.objects
+            .values("ruta__codigo", "ruta__origen", "ruta__destino")
+            .annotate(total_despachos=Count("id"))
+            .order_by("-total_despachos")
+        )
+        return Response(data)
