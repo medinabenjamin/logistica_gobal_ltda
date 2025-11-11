@@ -8,6 +8,8 @@ from .views import (
     ConductorViewSet,
     DespachoViewSet,
     PilotoViewSet,
+    ReporteCargasView,
+    ReporteRutasView,
     RutaViewSet,
     VehiculoViewSet,
     ping,
@@ -28,4 +30,6 @@ app_name = "transporte"
 urlpatterns = [
     path("", include(router.urls)),
     path("ping/", ping, name="ping"),
+    path("reportes/cargas/", ReporteCargasView.as_view(), name="reporte-cargas"),
+    path("reportes/rutas/", ReporteRutasView.as_view(), name="reporte-rutas"),
 ]
