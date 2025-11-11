@@ -14,7 +14,10 @@
                 <nav class="ms-lg-auto d-flex flex-wrap gap-2 align-items-center justify-content-lg-end">
                     {% if request.user.is_authenticated %}
                         {% for module in modules %}
-                            <a class="btn btn-light btn-sm text-primary fw-semibold px-3" href="{% url 'home' %}#module-{{ module.key }}">
+                            <a
+                                class="btn btn-sm fw-semibold px-3 {% if module.key == active_module_key %}btn-light text-primary{% else %}btn-outline-light text-white{% endif %}"
+                                href="{% url 'home' %}?module={{ module.key }}"
+                            >
                                 {{ module.label }}
                             </a>
                         {% endfor %}

@@ -190,6 +190,10 @@ def home(request):
             "total": instances.count(),
         }
 
+    requested_module_key = request.POST.get("module") if request.method == "POST" else request.GET.get("module")
+    if requested_module_key not in module_config:
+        requested_module_key = next(iter(module_config))
+
     if request.method == "POST":
         module_key = request.POST.get("module")
         action = request.POST.get("action", "create")
@@ -198,7 +202,7 @@ def home(request):
             messages.error(request, "El módulo seleccionado no es válido.")
             return HttpResponseRedirect(reverse("home"))
 
-        redirect_url = f"{reverse('home')}#module-{module_key}"
+        redirect_url = f"{reverse('home')}?module={module_key}"
 
         if action == "delete":
             pk = request.POST.get("pk")
@@ -242,12 +246,19 @@ def home(request):
             instance=instance
         )
         module_contexts[edit_module_key]["edit_instance"] = instance
+        requested_module_key = edit_module_key
 
+    active_module_key = requested_module_key
     return render(
         request,
         "transporte/home.html",
         {
-            "modules": list(module_contexts.values()),
+            "modules": [
+                {"key": key, "label": config["label"]}
+                for key, config in module_config.items()
+            ],
+            "active_module": module_contexts[active_module_key],
+            "active_module_key": active_module_key,
         },
     )
 
