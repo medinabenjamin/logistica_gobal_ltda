@@ -1,0 +1,50 @@
+:root {
+  --color-primario: #003F5C;      /* azul petróleo */
+  --color-secundario: #2F4B7C;    /* verde/azul petróleo */
+  --color-acento: #00BFA6;        /* verde azulado */
+  --color-fondo: #F8F9FA;         /* fondo claro */
+  --color-texto: #212529;         /* texto principal */
+  --color-borde: #E5E7EB;         /* gris claro */
+}
+
+body {
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.app-header {
+  background-color: var(--color-primario);
+  color: #fff;
+}
+
+.app-header h1 {
+  color: #fff;
+}
+
+.site-footer {
+  background-color: var(--color-primario);
+  color: #fff;
+}
+
+.site-footer small {
+  color: #fff;
+}
+
+.btn-primary {
+  background-color: var(--color-acento);
+  border-color: var(--color-acento);
+}
+
+.btn-primary:hover {
+  background-color: #00a892;
+  border-color: #00a892;
+}
+
+a {
+  color: var(--color-secundario);
+}
+
+a:hover {
+  color: var(--color-primario);
+}
