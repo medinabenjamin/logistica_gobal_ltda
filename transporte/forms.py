@@ -21,7 +21,7 @@ class BaseModelForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in self.fields.values():
+        for name, field in self.fields.items():
             if isinstance(field.widget, forms.TextInput):
                 field.widget.attrs.setdefault("class", "form-control")
             elif isinstance(field.widget, forms.Select):
@@ -34,7 +34,7 @@ class BaseModelForm(forms.ModelForm):
                 field.widget.attrs.setdefault("class", "form-control")
                 field.widget.attrs.setdefault("rows", 3)
 
-            if self.is_bound and field.errors:
+            if self.is_bound and self.errors.get(name):
                 existing_classes = field.widget.attrs.get("class", "")
                 field.widget.attrs["class"] = (
                     f"{existing_classes} is-invalid".strip()
