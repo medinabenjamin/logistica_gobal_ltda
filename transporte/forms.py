@@ -126,3 +126,4 @@ class DespachoForm(BaseModelForm):
         widgets = {
             "fecha": DateInput(),
         }
+

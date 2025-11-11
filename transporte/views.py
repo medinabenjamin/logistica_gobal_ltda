@@ -13,6 +13,8 @@ from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+
+
 from .forms import (
     AeronaveForm,
     CargaForm,
@@ -44,11 +46,15 @@ from .serializers import (
     VehiculoSerializer,
 )
 
+from .filters import (
+    VehiculoFilter, AeronaveFilter, ConductorFilter, PilotoFilter,
+    ClienteFilter, CargaFilter, RutaFilter, DespachoFilter
+)
+
 
 @api_view(["GET"])
 def ping(_request):
     """Simple endpoint for health checks."""
-
     return Response({"message": "pong"})
 
 
@@ -63,13 +69,10 @@ def home(request):
             "model": Vehiculo,
             "form_class": VehiculoForm,
             "fields": [
-                ("patente", "Patente"),
-                ("marca", "Marca"),
-                ("modelo", "Modelo"),
-                ("capacidad_kg", "Capacidad (kg)"),
-                ("anio", "Año"),
-                ("estado", "Estado"),
+                ("patente", "Patente"), ("marca", "Marca"), ("modelo", "Modelo"),
+                ("capacidad_kg", "Capacidad (kg)"), ("anio", "Año"), ("estado", "Estado"),
             ],
+            "filterset_class": VehiculoFilter,
         },
         "aeronaves": {
             "label": "Aeronaves",
@@ -77,12 +80,10 @@ def home(request):
             "model": Aeronave,
             "form_class": AeronaveForm,
             "fields": [
-                ("matricula", "Matrícula"),
-                ("fabricante", "Fabricante"),
-                ("modelo", "Modelo"),
-                ("capacidad_kg", "Capacidad (kg)"),
-                ("estado", "Estado"),
+                ("matricula", "Matrícula"), ("fabricante", "Fabricante"), ("modelo", "Modelo"),
+                ("capacidad_kg", "Capacidad (kg)"), ("estado", "Estado"),
             ],
+            "filterset_class": AeronaveFilter,
         },
         "conductores": {
             "label": "Conductores",
@@ -90,12 +91,10 @@ def home(request):
             "model": Conductor,
             "form_class": ConductorForm,
             "fields": [
-                ("run", "RUN"),
-                ("nombre", "Nombre"),
-                ("licencia", "Licencia"),
-                ("telefono", "Teléfono"),
-                ("activo", "Activo"),
+                ("run", "RUN"), ("nombre", "Nombre"), ("licencia", "Licencia"),
+                ("telefono", "Teléfono"), ("activo", "Activo"),
             ],
+            "filterset_class": ConductorFilter,
         },
         "pilotos": {
             "label": "Pilotos",
@@ -103,12 +102,10 @@ def home(request):
             "model": Piloto,
             "form_class": PilotoForm,
             "fields": [
-                ("run", "RUN"),
-                ("nombre", "Nombre"),
-                ("licencia", "Licencia"),
-                ("horas_vuelo", "Horas vuelo"),
-                ("activo", "Activo"),
+                ("run", "RUN"), ("nombre", "Nombre"), ("licencia", "Licencia"),
+                ("horas_vuelo", "Horas vuelo"), ("activo", "Activo"),
             ],
+            "filterset_class": PilotoFilter,
         },
         "clientes": {
             "label": "Clientes",
@@ -116,11 +113,10 @@ def home(request):
             "model": Cliente,
             "form_class": ClienteForm,
             "fields": [
-                ("nombre", "Nombre"),
-                ("rut", "RUT"),
-                ("telefono", "Teléfono"),
-                ("email", "Email"),
+                ("nombre", "Nombre"), ("rut", "RUT"),
+                ("telefono", "Teléfono"), ("email", "Email"),
             ],
+            "filterset_class": ClienteFilter,
         },
         "cargas": {
             "label": "Cargas",
@@ -128,12 +124,10 @@ def home(request):
             "model": Carga,
             "form_class": CargaForm,
             "fields": [
-                ("descripcion", "Descripción"),
-                ("cliente", "Cliente"),
-                ("peso_kg", "Peso (kg)"),
-                ("tipo", "Tipo"),
-                ("valor_estimado", "Valor estimado"),
+                ("descripcion", "Descripción"), ("cliente", "Cliente"), ("peso_kg", "Peso (kg)"),
+                ("tipo", "Tipo"), ("valor_estimado", "Valor estimado"),
             ],
+            "filterset_class": CargaFilter,
         },
         "rutas": {
             "label": "Rutas",
@@ -141,12 +135,10 @@ def home(request):
             "model": Ruta,
             "form_class": RutaForm,
             "fields": [
-                ("codigo", "Código"),
-                ("origen", "Origen"),
-                ("destino", "Destino"),
-                ("tipo_transporte", "Tipo"),
-                ("duracion_estimada_min", "Duración (min)"),
+                ("codigo", "Código"), ("origen", "Origen"), ("destino", "Destino"),
+                ("tipo_transporte", "Tipo"), ("duracion_estimada_min", "Duración (min)"),
             ],
+            "filterset_class": RutaFilter,
         },
         "despachos": {
             "label": "Despachos",
@@ -154,18 +146,25 @@ def home(request):
             "model": Despacho,
             "form_class": DespachoForm,
             "fields": [
-                ("codigo", "Código"),
-                ("fecha", "Fecha"),
-                ("ruta", "Ruta"),
-                ("vehiculo", "Vehículo"),
-                ("aeronave", "Aeronave"),
-                ("conductor", "Conductor"),
-                ("piloto", "Piloto"),
-                ("carga", "Carga"),
-                ("estado", "Estado"),
+                ("codigo", "Código"), ("fecha", "Fecha"), ("ruta", "Ruta"),
+                ("vehiculo", "Vehículo"), ("aeronave", "Aeronave"), ("conductor", "Conductor"),
+                ("piloto", "Piloto"), ("carga", "Carga"), ("estado", "Estado"),
             ],
+            "filterset_class": DespachoFilter,
         },
     }
+
+    # --- INICIO LÓGICA DE VISTA REFACTORIZADA ---
+    
+    # 1. Determinar el módulo, vista y pk de la URL (GET)
+    requested_module_key = request.GET.get("module")
+    if requested_module_key not in module_config:
+        requested_module_key = next(iter(module_config))
+        
+    current_view_mode = request.GET.get("view", "list") # 'list' por defecto
+    current_edit_pk = request.GET.get("pk")
+
+    search_query = request.GET.get('q', '')
 
     def _format_value(instance, field_name):
         display_method = getattr(instance, f"get_{field_name}_display", None)
@@ -180,51 +179,33 @@ def home(request):
         return str(value)
 
     module_contexts = {}
-    for key, config in module_config.items():
-        instances = config["model"].objects.all()
-        module_contexts[key] = {
-            "key": key,
-            "label": config["label"],
-            "label_singular": config["singular_label"],
-            "create_form": config["form_class"](),
-            "headers": [label for _, label in config["fields"]],
-            "rows": [
-                {
-                    "pk": instance.pk,
-                    "values": [
-                        _format_value(instance, field_name)
-                        for field_name, _ in config["fields"]
-                    ],
-                }
-                for instance in instances
-            ],
-            "total": instances.count(),
-            "display_mode": "list",
-        }
-
-    requested_module_key = request.POST.get("module") if request.method == "POST" else request.GET.get("module")
-    if requested_module_key not in module_config:
-        requested_module_key = next(iter(module_config))
-
+    
+    # 2. Procesar la lógica POST (Crear, Actualizar, Borrar)
     if request.method == "POST":
         module_key = request.POST.get("module")
         action = request.POST.get("action", "create")
         config = module_config.get(module_key)
+        
+        # Sobrescribir el módulo activo con el del POST
+        requested_module_key = module_key 
+
         if not config:
             messages.error(request, "El módulo seleccionado no es válido.")
             return HttpResponseRedirect(reverse("home"))
 
-        redirect_url = f"{reverse('home')}?module={module_key}"
+        # Mantener los filtros (GET params) en la URL después de la acción
+        current_get_params = request.GET.copy()
+        current_get_params['module'] = module_key # Asegurar el módulo
+        if 'view' in current_get_params: del current_get_params['view'] # Volver a lista
+        if 'pk' in current_get_params: del current_get_params['pk'] # Quitar pk
+        
+        redirect_url = f"{reverse('home')}?{current_get_params.urlencode()}"
 
-        requested_module_key = module_key
         if action == "delete":
             pk = request.POST.get("pk")
             instance = get_object_or_404(config["model"], pk=pk)
             instance.delete()
-            messages.success(
-                request,
-                f"{config['label']} — registro eliminado correctamente.",
-            )
+            messages.success(request, f"{config['label']} — registro eliminado correctamente.")
             return HttpResponseRedirect(redirect_url)
 
         instance = None
@@ -237,38 +218,89 @@ def home(request):
         if form.is_valid():
             form.save()
             verb = "actualizado" if action == "update" else "creado"
-            messages.success(
-                request,
-                f"{config['label']} — registro {verb} correctamente.",
-            )
+            messages.success(request, f"{config['label']} — registro {verb} correctamente.")
             return HttpResponseRedirect(redirect_url)
-
-        context_form = module_contexts[module_key]
-        if action == "update":
-            context_form["edit_form"] = form
-            context_form["edit_instance"] = instance
-            context_form["display_mode"] = "edit"
         else:
-            context_form["create_form"] = form
-            context_form["display_mode"] = "create"
+            # Si el formulario NO es válido, el POST falla.
+            # Guardamos el formulario con errores para mostrarlo.
+            if action == "update":
+                # Guardamos el form de 'edit' y forzamos el modo 'edit'
+                module_contexts['failed_edit_form'] = form
+                module_contexts['failed_edit_instance'] = instance
+                current_view_mode = 'edit' # Forzar modo
+                current_edit_pk = instance.pk # Forzar pk
+            else:
+                # Guardamos el form de 'create' y forzamos el modo 'create'
+                module_contexts['failed_create_form'] = form
+                current_view_mode = 'create' # Forzar modo
+            
+            messages.error(request, "Error al guardar, por favor revisa los campos.")
 
-    edit_module_key = request.GET.get("module")
-    edit_pk = request.GET.get("pk")
-    if edit_module_key in module_config and edit_pk:
-        config = module_config[edit_module_key]
-        instance = get_object_or_404(config["model"], pk=edit_pk)
-        module_contexts[edit_module_key]["edit_form"] = config["form_class"](
-            instance=instance
-        )
-        module_contexts[edit_module_key]["edit_instance"] = instance
-        requested_module_key = edit_module_key
-        module_contexts[edit_module_key]["display_mode"] = "edit"
+    # 3. Construir el contexto para TODOS los módulos (para GET y POST fallidos)
+    for key, config in module_config.items():
+        
+        # Filtrar el queryset
+        instances_qs = config["model"].objects.all()
+        filter_form = None
+        if config.get("filterset_class"):
+            filter_form = config["filterset_class"](request.GET, queryset=instances_qs)
+            instances_qs = filter_form.qs
 
-    view_mode = request.GET.get("view")
-    if view_mode == "create" and requested_module_key in module_contexts:
-        module_contexts[requested_module_key]["display_mode"] = "create"
-    elif view_mode == "list" and requested_module_key in module_contexts:
-        module_contexts[requested_module_key]["display_mode"] = "list"
+        instances = instances_qs
+        
+        # Determinar el modo de visualización final
+        display_mode = 'list' # Por defecto
+        create_form_instance = config["form_class"]() # Formulario 'create' limpio
+        edit_form_instance = None # Formulario 'edit'
+        edit_instance_obj = None # Instancia para editar
+
+        if key == requested_module_key:
+            if current_view_mode == 'create':
+                display_mode = 'create'
+                # Si un POST falló, usamos el formulario con errores
+                if 'failed_create_form' in module_contexts:
+                    create_form_instance = module_contexts['failed_create_form']
+            
+            elif current_view_mode == 'edit' or (current_edit_pk and not action == "update"):
+                display_mode = 'edit'
+                # Si un POST falló, usamos el formulario con errores
+                if 'failed_edit_form' in module_contexts and 'failed_edit_instance' in module_contexts:
+                    edit_form_instance = module_contexts['failed_edit_form']
+                    edit_instance_obj = module_contexts['failed_edit_instance']
+                # Si es un GET, creamos el formulario de edición
+                elif current_edit_pk:
+                    try:
+                        edit_instance_obj = get_object_or_404(config["model"], pk=current_edit_pk)
+                        edit_form_instance = config["form_class"](instance=edit_instance_obj)
+                    except:
+                        messages.error(request, "El registro a editar no fue encontrado.")
+                        display_mode = 'list' # Volver a la lista si hay error
+
+        module_contexts[key] = {
+            "key": key,
+            "label": config["label"],
+            "singular_label": config["singular_label"],
+            "headers": [label for _, label in config["fields"]],
+            "rows": [
+                {
+                    "pk": instance.pk,
+                    "values": [
+                        _format_value(instance, field_name)
+                        for field_name, _ in config["fields"]
+                    ],
+                }
+                for instance in instances
+            ],
+            "total": instances.count(),
+            "filter_form": filter_form,
+            
+            "display_mode": display_mode, # 'list', 'create', o 'edit'
+            "create_form": create_form_instance, # Siempre hay un form 'create'
+            "edit_form": edit_form_instance, # Solo si display_mode es 'edit'
+            "edit_instance": edit_instance_obj, # Solo si display_mode es 'edit'
+        }
+
+    # --- FIN LÓGICA DE VISTA REFACTORIZADA ---
 
     active_module_key = requested_module_key
     return render(
@@ -280,7 +312,8 @@ def home(request):
                 for key, config in module_config.items()
             ],
             "active_module": module_contexts[active_module_key],
-            "active_module_key": active_module_key,
+            "active_module_key": active_module_key,     
+            "search_query": search_query,
         },
     )
 

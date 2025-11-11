@@ -16,138 +16,173 @@
     </div>
 </div>
 
-{% with module=active_module %}
-{% with mode=module.display_mode|default:'list' %}
-<section id="module-{{ module.key }}" class="mb-5">
-    <div class="card shadow-sm">
-        <div class="card-header bg-white d-flex flex-column flex-md-row align-items-md-center gap-2">
-            <div class="me-md-auto">
-                <h3 class="h5 mb-0">{{ module.label }}</h3>
-                <small class="text-muted">{{ module.total }} registro{{ module.total|pluralize:"s" }}</small>
-            </div>
-            <div class="d-flex flex-wrap align-items-center gap-2 ms-md-auto">
-                {% if mode == 'create' %}
-                    <a class="btn btn-outline-primary btn-sm" href="{% url 'home' %}?module={{ module.key }}&view=list">
-                        Volver al listado
-                    </a>
-                {% else %}
-                    <a class="btn btn-primary btn-sm" href="{% url 'home' %}?module={{ module.key }}&view=create">
-                        Crear nuevo {{ module.label_singular }}
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-        <div class="card-body">
-            {% if mode != 'create' %}
-                {% if module.rows %}
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover align-middle">
-                            <thead>
-                                <tr>
-                                    {% for header in module.headers %}
-                                        <th scope="col">{{ header }}</th>
-                                    {% endfor %}
-                                    <th scope="col" class="text-end">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for row in module.rows %}
-                                <tr>
-                                    {% for value in row.values %}
-                                        <td>{{ value }}</td>
-                                    {% endfor %}
-                                    <td class="text-end">
-                                        <a href="{% url 'home' %}?module={{ module.key }}&pk={{ row.pk }}" class="btn btn-sm btn-outline-primary">
-                                            Editar
-                                        </a>
-                                        <form method="post" class="d-inline">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="module" value="{{ module.key }}">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="pk" value="{{ row.pk }}">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Deseas eliminar este registro de {{ module.label|lower }}?');">
-                                                Eliminar
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <p class="text-muted mb-0">Aún no existen registros para este módulo.</p>
-                {% endif %}
+<div class="row">
 
-                {% if module.edit_form and mode == 'edit' %}
-                    <hr>
-                    <h4 class="h6">Editar {{ module.label_singular|lower }}</h4>
-                    <form method="post" class="row g-3">
-                        {% csrf_token %}
-                        <input type="hidden" name="module" value="{{ module.key }}">
-                        <input type="hidden" name="action" value="update">
-                        <input type="hidden" name="pk" value="{{ module.edit_instance.pk }}">
-                        {{ module.edit_form.non_field_errors }}
-                        {% for field in module.edit_form %}
-                            <div class="col-12 col-md-6">
-                                {% if field.field.widget.input_type == 'checkbox' %}
-                                    <div class="form-check mt-4">
-                                        {{ field }}
-                                        <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                    </div>
-                                {% else %}
-                                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                    {{ field }}
-                                {% endif %}
-                                {% if field.help_text %}
-                                    <div class="form-text">{{ field.help_text }}</div>
-                                {% endif %}
-                                {% for error in field.errors %}
-                                    <div class="invalid-feedback d-block">{{ error }}</div>
-                                {% endfor %}
-                            </div>
-                        {% endfor %}
-                        <div class="col-12 d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                            <a href="{% url 'home' %}?module={{ module.key }}" class="btn btn-outline-secondary">Cancelar</a>
-                        </div>
-                    </form>
-                {% endif %}
-            {% else %}
-                <h4 class="h6">Crear nuevo {{ module.label_singular|lower }}</h4>
-                <form method="post" class="row g-3">
-                    {% csrf_token %}
-                    <input type="hidden" name="module" value="{{ module.key }}">
-                    <input type="hidden" name="action" value="create">
-                    {{ module.create_form.non_field_errors }}
-                    {% for field in module.create_form %}
-                        <div class="col-12 col-md-6">
-                            {% if field.field.widget.input_type == 'checkbox' %}
-                                <div class="form-check mt-4">
-                                    {{ field }}
-                                    <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                </div>
-                            {% else %}
-                                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                {{ field }}
-                            {% endif %}
-                            {% if field.help_text %}
-                                <div class="form-text">{{ field.help_text }}</div>
-                            {% endif %}
-                            {% for error in field.errors %}
-                                <div class="invalid-feedback d-block">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-                    <div class="col-12 d-flex gap-2">
-                        <button type="submit" class="btn btn-success">Crear</button>
-                        <a href="{% url 'home' %}?module={{ module.key }}&view=list" class="btn btn-outline-secondary">Cancelar</a>
+    <div class="col-lg-12">
+
+        {% with module=active_module %}
+        {% with mode=module.display_mode|default:'list' %}
+        <section id="module-{{ module.key }}" class="mb-5">
+            <div class="card shadow-sm">
+                
+                <div class="card-header bg-white d-flex flex-column flex-md-row align-items-md-center gap-2">
+                    <div class="me-md-auto">
+                        <h3 class="h5 mb-0">{{ module.label }}</h3>
+                        <small class="text-muted">{{ module.total }} registro{{ module.total|pluralize:"s" }}</small>
                     </div>
-                </form>
-            {% endif %}
-        </div>
-    </div>
-</section>
-{% endwith %}
-{% endwith %}
-{% endblock %}
+                    <div class="d-flex flex-wrap align-items-center gap-2 ms-md-auto">
+                        {% if mode == 'create' or mode == 'edit' %}
+                            <a class="btn btn-outline-primary btn-sm" href="{% url 'home' %}?module={{ module.key }}&view=list">
+                                <i class="bi bi-arrow-left"></i> Volver al listado
+                            </a>
+                        {% else %}
+                            <a class="btn btn-primary btn-sm" href="{% url 'home' %}?module={{ module.key }}&view=create">
+                                <i class="bi bi-plus-lg"></i> Crear nuevo {{ module.label_singular }}
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card-body">
+
+                    {% if mode == 'list' %}
+                        
+                        {% if module.filter_form %}
+                        <form method="GET" action="{% url 'home' %}" class="mb-4 p-3 border rounded bg-light">
+                            <input type="hidden" name="module" value="{{ module.key }}">
+                            <div class="row g-3 align-items-end">
+                                {% with q_field=module.filter_form.form.q %}
+                                <div class="col-md-6">
+                                    <label for="{{ q_field.id_for_label }}" class="form-label fw-bold">{{ q_field.label }}</label>
+                                    {{ q_field }}
+                                </div>
+                                {% endwith %}
+                                {% for field in module.filter_form.form %}{% if field.name != 'q' %}
+                                <div class="col-md-6">
+                                    <label for="{{ field.id_for_label }}" class="form-label fw-bold">{{ field.label }}</label>
+                                    {{ field }}
+                                </div>
+                                {% endif %}{% endfor %}
+                                <div class="col-12 d-flex gap-2">
+                                    <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Filtrar / Buscar</button>
+                                    {% if request.GET.q or request.GET.estado or request.GET.tipo_transporte or request.GET.cliente or request.GET.ruta %}
+                                    <a href="?module={{ module.key }}" class="btn btn-outline-danger" title="Limpiar búsqueda y filtros">
+                                        <i class="bi bi-x-lg"></i> Limpiar
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </form>
+                        {% endif %}
+
+                        {% if module.rows %}
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            {% for header in module.headers %}
+                                                <th scope="col">{{ header }}</th>
+                                            {% endfor %}
+                                            <th scope="col" class="text-end">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in module.rows %}
+                                        <tr>
+                                            {% for value in row.values %}
+                                                <td>{{ value }}</td>
+                                            {% endfor %}
+                                            <td class="text-end">
+                                                <a href="{% url 'home' %}?module={{ module.key }}&pk={{ row.pk }}" class="btn btn-sm btn-outline-primary">
+                                                    Editar
+                                                </a>
+                                                <form method="post" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="module" value="{{ module.key }}">
+                                                    <input type="hidden" name="action" value="delete">
+                                                    <input type="hidden" name="pk" value="{{ row.pk }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Deseas eliminar este registro de {{ module.label|lower }}?');">
+                                                        Eliminar
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            {% if request.GET %}
+                                <p class="text-muted mb-0">No se encontraron registros que coincidan con los filtros aplicados.</p>
+                            {% else %}
+                                <p class="text-muted mb-0">Aún no existen registros para este módulo.</p>
+                            {% endif %}
+                        {% endif %}
+
+                    {% elif mode == 'edit' %}
+                        
+                        <h4 class="h6">Editar {{ module.label_singular|lower }}: {{ module.edit_instance }}</h4>
+                        <form method="post" class="row g-3">
+                            {% csrf_token %}
+                            <input type="hidden" name="module" value="{{ module.key }}">
+                            <input type="hidden" name="action" value="update">
+                            <input type="hidden" name="pk" value="{{ module.edit_instance.pk }}">
+                            {{ module.edit_form.non_field_errors }}
+                            {% for field in module.edit_form %}
+                                <div class="col-12 col-md-6">
+                                    {% if field.field.widget.input_type == 'checkbox' %}
+                                        <div class="form-check mt-4">
+                                            {{ field }}
+                                            <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                        </div>
+                                    {% else %}
+                                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                        {{ field }}
+                                    {% endif %}
+                                    {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                                    {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                                </div>
+                            {% endfor %}
+                            <div class="col-12 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                <a href="{% url 'home' %}?module={{ module.key }}" class="btn btn-outline-secondary">Cancelar</a>
+                            </div>
+                        </form>
+
+                    {% elif mode == 'create' %}
+
+                        <h4 class="h6">Crear nuevo {{ module.label_singular|lower }}</h4>
+                        <form method="post" class="row g-3">
+                            {% csrf_token %}
+                            <input type="hidden" name="module" value="{{ module.key }}">
+                            <input type="hidden" name="action" value="create">
+                            {{ module.create_form.non_field_errors }}
+                            {% for field in module.create_form %}
+                                <div class="col-12 col-md-6">
+                                    {% if field.field.widget.input_type == 'checkbox' %}
+                                        <div class="form-check mt-4">
+                                            {{ field }}
+                                            <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                        </div>
+                                    {% else %}
+                                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                        {{ field }}
+                                    {% endif %}
+                                    {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                                    {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                                L </div>
+                            {% endfor %}
+                            <div class="col-12 d-flex gap-2">
+                                <button type="submit" class="btn btn-success">Crear</button>
+                                <a href="{% url 'home' %}?module={{ module.key }}&view=list" class="btn btn-outline-secondary">Cancelar</a>
+                            </div>
+                        </form>
+                        
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+        {% endwith %}
+        {% endwith %}
+
+    </div> </div> {% endblock %}
