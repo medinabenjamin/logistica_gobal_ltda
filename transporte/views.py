@@ -57,6 +57,7 @@ def home(request):
     module_config = {
         "vehiculos": {
             "label": "Vehículos",
+            "singular_label": "Vehículo",
             "model": Vehiculo,
             "form_class": VehiculoForm,
             "fields": [
@@ -70,6 +71,7 @@ def home(request):
         },
         "aeronaves": {
             "label": "Aeronaves",
+            "singular_label": "Aeronave",
             "model": Aeronave,
             "form_class": AeronaveForm,
             "fields": [
@@ -82,6 +84,7 @@ def home(request):
         },
         "conductores": {
             "label": "Conductores",
+            "singular_label": "Conductor",
             "model": Conductor,
             "form_class": ConductorForm,
             "fields": [
@@ -94,6 +97,7 @@ def home(request):
         },
         "pilotos": {
             "label": "Pilotos",
+            "singular_label": "Piloto",
             "model": Piloto,
             "form_class": PilotoForm,
             "fields": [
@@ -106,6 +110,7 @@ def home(request):
         },
         "clientes": {
             "label": "Clientes",
+            "singular_label": "Cliente",
             "model": Cliente,
             "form_class": ClienteForm,
             "fields": [
@@ -117,6 +122,7 @@ def home(request):
         },
         "cargas": {
             "label": "Cargas",
+            "singular_label": "Carga",
             "model": Carga,
             "form_class": CargaForm,
             "fields": [
@@ -129,6 +135,7 @@ def home(request):
         },
         "rutas": {
             "label": "Rutas",
+            "singular_label": "Ruta",
             "model": Ruta,
             "form_class": RutaForm,
             "fields": [
@@ -141,6 +148,7 @@ def home(request):
         },
         "despachos": {
             "label": "Despachos",
+            "singular_label": "Despacho",
             "model": Despacho,
             "form_class": DespachoForm,
             "fields": [
@@ -175,6 +183,7 @@ def home(request):
         module_contexts[key] = {
             "key": key,
             "label": config["label"],
+            "label_singular": config["singular_label"],
             "create_form": config["form_class"](),
             "headers": [label for _, label in config["fields"]],
             "rows": [
@@ -188,6 +197,7 @@ def home(request):
                 for instance in instances
             ],
             "total": instances.count(),
+            "display_mode": "list",
         }
 
     requested_module_key = request.POST.get("module") if request.method == "POST" else request.GET.get("module")
@@ -204,6 +214,7 @@ def home(request):
 
         redirect_url = f"{reverse('home')}?module={module_key}"
 
+        requested_module_key = module_key
         if action == "delete":
             pk = request.POST.get("pk")
             instance = get_object_or_404(config["model"], pk=pk)
@@ -234,8 +245,10 @@ def home(request):
         if action == "update":
             context_form["edit_form"] = form
             context_form["edit_instance"] = instance
+            context_form["display_mode"] = "edit"
         else:
             context_form["create_form"] = form
+            context_form["display_mode"] = "create"
 
     edit_module_key = request.GET.get("module")
     edit_pk = request.GET.get("pk")
@@ -247,6 +260,13 @@ def home(request):
         )
         module_contexts[edit_module_key]["edit_instance"] = instance
         requested_module_key = edit_module_key
+        module_contexts[edit_module_key]["display_mode"] = "edit"
+
+    view_mode = request.GET.get("view")
+    if view_mode == "create" and requested_module_key in module_contexts:
+        module_contexts[requested_module_key]["display_mode"] = "create"
+    elif view_mode == "list" and requested_module_key in module_contexts:
+        module_contexts[requested_module_key]["display_mode"] = "list"
 
     active_module_key = requested_module_key
     return render(
