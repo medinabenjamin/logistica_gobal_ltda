@@ -26,12 +26,6 @@
                 <small class="text-muted">{{ module.total }} registro{{ module.total|pluralize:"s" }}</small>
             </div>
             <div class="d-flex flex-wrap align-items-center gap-2 ms-md-auto">
-                <a class="btn btn-outline-secondary btn-sm" href="/swagger/" target="_blank" rel="noopener">
-                    Ver API
-                </a>
-                <a class="btn btn-outline-secondary btn-sm" href="/admin/" target="_blank" rel="noopener">
-                    Abrir admin
-                </a>
                 {% if mode == 'create' %}
                     <a class="btn btn-outline-primary btn-sm" href="{% url 'home' %}?module={{ module.key }}&view=list">
                         Volver al listado
