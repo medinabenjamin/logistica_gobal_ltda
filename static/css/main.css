@@ -48,3 +48,11 @@ a {
 a:hover {
   color: var(--color-primario);
 }
+
+.navbar-brand img {
+  height: 55px;
+}
+
+.login-logo img {
+  height: 80px;
+}
