@@ -24,8 +24,6 @@
                                 {{ module.label }}
                             </a>
                         {% endfor %}
-                        <a class="btn btn-outline-light btn-sm" href="/admin/">Administración</a>
-                        <a class="btn btn-outline-light btn-sm" href="/swagger/">Swagger</a>
                         <a class="btn btn-outline-light btn-sm" href="/api/ping/">Ping API</a>
                         <form method="post" action="{% url 'logout' %}" class="ms-lg-3">
                             {% csrf_token %}
