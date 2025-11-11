@@ -11,7 +11,7 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
     <header class="app-header py-3">
-        <div class="container d-flex align-items-center justify-content-between">
+        <div class="container-fluid px-3 px-lg-4 d-flex align-items-center justify-content-between">
             <a href="/" class="navbar-brand d-flex align-items-center gap-2 text-decoration-none">
                 <img src="{% static 'img/logo-logistica-global.svg' %}" alt="Logística Global Ltda." height="55">
             </a>
@@ -26,13 +26,18 @@
                             {{ module.label }}
                         </a>
                     {% endfor %}
+                    <a class="btn btn-outline-light btn-sm" href="{% url 'schema-swagger-ui' %}" target="_blank" rel="noopener">
+                        API
+                    </a>
+                    <a class="btn btn-outline-light btn-sm" href="{% url 'admin:index' %}" target="_blank" rel="noopener">
+                        Admin
+                    </a>
                     <a class="btn btn-outline-light btn-sm" href="/api/ping/">Ping API</a>
                     <form method="post" action="{% url 'logout' %}" class="ms-lg-3">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger btn-sm px-3">Cerrar sesión</button>
                     </form>
                 {% else %}
-                    <a class="btn btn-light btn-sm text-primary fw-semibold px-3" href="{% url 'login' %}">Iniciar sesión</a>
                 {% endif %}
             </nav>
         </div>
